@@ -1,0 +1,285 @@
+---
+title: "Untitled"
+author: "Analysis"
+date: "2024-01-09"
+output: word_document
+---
+Introduction
+The world of music is very dynamic and over the years, it has undergone many changes especially with the introduction of digital streaming. Among the many digital streaming services, Spotify is one of the largest platforms in the world currently available because it hosts an extensive library of millions of tracks serving as a cultural soundscape for all its users worldwide. With time, as the musical preferences continue to shape and get shaped by the trends in the society, it is important to understand the intricacies which best define and explain the most popular songs within the digital landscape.
+The purpose of this report is to conduct an analysis of the musical attributes which distinguish the top 100 tracks of Spotify. Musical is most often referred as a universal language which resonates with different people across the world, permeating into the different cultures of the world. Therefore, it is important to understand the quantitative aspects that contribute to the popularity of a song in a data-driven manner. The Spotify database is a rich repository with many genres, giving enough data for the required analysis and by analysing the curated list of the top 100 tracks; this analysis will be able to show the patterns and trends which define the excellence of music in the digital field. 
+
+Background
+The music industry has been redefined during the digital age on factors that include how music gets produced, consumed and popularized. Spotify is one of the leading companies within this revolution that are leading it making it an integral part of the music industry currently thus an important part of contemporary musical culture (Hodgson, 2021). As the platform has an extensive array of songs, understanding the determinants of the most popular tracks within the top 100 therefore becomes an essential endeavour which provides more insights into the evolving field of music consumption, creation and reception.
+Music plays an important aspect in the current world. Spotify uses different machine learning algorithms to try and understand the different tastes exhibited by their users and from this, they use recommender algorithms to suggest different music to different people. This is an important aspect that assists the company to operate better since their users will always get the type of music that they prefer as opposed to being exposed to all types of music which improves their overall satisfaction with the platform (Chodos, 2019). This understanding of how Spotify operates is very integral because the manner in which the company understands their clients is not only based on the musical genre alone, but also on other musical characteristics as well. 
+
+
+Research Question
+The research question for this paper is: 
+What musical attributes that are associated with the top 100 music on Spotify?
+The data to be used for this analysis will be from Spotify and it was obtained from Kaggle (2022). This data has 14 columns which represent different attributes of the dataset. These are some of the characteristics of the dataframe:
+•	acousticness: [0–1] Confidence measure of whether the track is acoustic.
+•	danceability: [0–1] Describes how suitable a track is for dancing based on musical attributes including tempo, rhythm, stability, beat strength, and overall regularity.
+•	energy: [0–1] Perceptual measure of intensity and activity. Energetic tracks feel fast, loud, and noisy (e.g. death metal: high energy, Bach prelude: low energy).
+•	instrumentalness: [0–1] Predicts whether a track contains no vocals (values above 0.5 represent instrumental tracks whereas rap songs would have a score close to 0).
+•	liveness: [0–1] Detects the presence of an audience in the recording.
+•	loudness: [-60–0 dB] The average volume across an entire track.
+•	speechiness: [0–1] Detects the presence of spoken words in a track (values above 0.66 describe tracks that are probably made entirely of spoken words, 0.33–0.66 describe tracks that may contain both music and speech, and values below 0.33 most likely represent music and other non-speech-like tracks).
+•	valence: [0–1] Describes the musical positiveness conveyed by a track. Tracks with high valence sound more positive (e.g. happy, cheerful, euphoric), while tracks with low valence sound more negative (e.g. sad, depressed, angry).
+•	tempo: [0–300 BPM] The speed or pace of a given piece, as derived from the estimated average beat duration.
+Methodology
+This analysis will follow a quantitative approach in which explanatory data analysis (EDA) will get conducted together with a correlation matrix being created for the dataset. The analysis will allow for a better understanding of the dataset to assist in answering the research question. 
+
+
+Analysis and Results
+```{r}
+#load the dataset
+
+#Exploring the dataset for both the head and tail
+head(datasheet)
+tail(datasheet)
+
+```
+
+```{r}
+# Display a summary of the dataset
+summary(datasheet)
+```
+
+```{r}
+#making a correlation matrix
+correlation_matrix <- cor(datasheet[, c("year", "beats.per.minute", "energy", "danceability", "loudness.dB", "liveness", "valance", "length", "acousticness", "speechiness", "popularity")])
+
+# Print the correlation matrix
+print(correlation_matrix)
+
+```
+
+
+```{r}
+# Install and load the 'corrplot' package if not already installed
+# install.packages("corrplot")
+install.packages("corrplot")
+library(corrplot)
+
+# Assuming your dataset is named 'datasheet'
+correlation_matrix <- cor(datasheet[, c("year", "beats.per.minute", "energy", "danceability", "loudness.dB", "liveness", "valance", "length", "acousticness", "speechiness", "popularity")])
+
+# Create a heatmap
+corrplot(correlation_matrix, method = "color", type = "upper", col = colorRampPalette(c("blue", "white", "red"))(100), addCoef.col = "black")
+
+
+```
+From the correlation matrix we can say:
+
+High positive correlation between loudness and energy (+0.73)
+High negative correlation between acousticness and energy (-0.71)
+Fairly high positive correlation between valance and danceability (+0.48)
+Failry high negative correlation between loudness and acousticness (-0.54)
+
+```{r}
+#release year
+boxplot(datasheet$year, main="Boxplot of Year", ylab="Year", col="lightblue", border="black")
+
+#finding the exact outliers
+outliers <- boxplot.stats(datasheet$year)$out
+
+# Display the values of outliers
+print(outliers)
+
+# code for showing the specific years with te outliers
+outlier_songs <- datasheet[datasheet$year < 2010, ]
+
+# Display the details of outlier songs
+print(outlier_songs)
+
+
+```
+
+The median year is 2017 for the releases. Most of the music were released between 2015 to 2018. The years with the outliers according to years are: 1975 2004 2008 1995. The songs which are the outliers in regards to their dates are Bohemian Rhapsody - Remastered 2011, Mr. Brightside, I'm Yours and Wonderwall - Remastered which were released according to the years respectively. 
+
+```{r}
+library(ggplot2)
+#Analyzing Beats per Minute VS Release Year
+# Convert 'year' column to factor to treat it as categorical
+datasheet$year <- as.factor(datasheet$year)
+
+# Create the bar plot
+plot <- ggplot(datasheet, aes(x = year, y = beats.per.minute)) +
+  geom_bar(stat = "summary", fun = "mean", fill = "skyblue") +
+  geom_text(stat = "summary", fun = function(x) mean(x), aes(label = round(..y..)), vjust = -0.5, size = 4) +
+  labs(x = "Release Year", y = "BPM", title = "BPM vs Release Year") +
+  theme_minimal()
+
+# Display the plot
+print(plot)
+
+```
+
+From the graph, there was a sharp increase in bpm vs release year in 1975 to 1995, then a drop witnessed from 2004 to 2012. After that,there was an increase in the beats per minute of the songs from 2013 to 2020 followed by a drop in 2021. 
+
+```{r}
+library(ggplot2)
+
+# Convert 'year' column to factor to treat it as categorical
+datasheet$year <- as.factor(datasheet$year)
+
+# Create the bar plot
+plot2 <- ggplot(datasheet, aes(x = year, y = length)) +
+  geom_bar(stat = "summary", fun = "mean", fill = "blue") +
+  geom_text(stat = "summary", fun = function(x) mean(x), aes(label = round(..y.., 1)), vjust = -0.5, size = 4) +
+  labs(x = "Release Year", y = "Length (minutes)", title = "Length vs Release Year") +
+  theme_minimal()
+
+# Display the plot
+print(plot2)
+```
+The graph shows that the average length of songs has been decrease as the years increase with a steady drop seen from graph, especially from 2013 to 2021
+
+
+```{r}
+library(ggplot2)
+
+# Convert 'year' column to factor to treat it as categorical
+datasheet$year <- as.factor(datasheet$year)
+
+# Create the bar plot
+plot <- ggplot(datasheet, aes(x = year, y = loudness.dB)) +
+  geom_bar(stat = "summary", fun = "mean", fill = "Red") +
+  geom_text(stat = "summary", fun = function(x) mean(x), aes(label = round(..y.., 1)), vjust = -0.5, size = 4) +
+  labs(x = "Release Year", y = "Loudness (dB)", title = "Loudness vs Release Year") +
+  theme_minimal()
+
+# Display the plot
+print(plot)
+
+
+```
+
+The loudness of the Top 100 most Streamed dropped drastically from 1975 to 1995. The loudness of the songs has been relatively steady from 2013 to 2021. 
+
+```{r}
+# Dropping unwanted columns
+df_feat <- datasheet[, !(names(datasheet) %in% c('year', 'artist', 'top.genre', 'title', 'loudness.dB', 'length', 'beats.per.minute'))]
+
+# Creating a dataframe with mean values
+df_mean <- as.data.frame(tibble::tibble(attribute = names(df_feat), value = colMeans(df_feat)))
+
+# Sorting the dataframe by values in descending order
+df_mean <- df_mean[order(-df_mean$value), ]
+
+# Renaming the columns
+colnames(df_mean) <- c("attribute", "value")
+
+# Assuming 'df_mean' is your dataframe with mean values
+library(ggplot2)
+
+# Creating a bar graph
+ggplot(df_mean, aes(x = attribute, y = value)) +
+  geom_bar(stat = "identity", fill = "skyblue", color = "black") +
+  labs(title = "Mean Musical Attributes",
+       x = "Musical Attributes",
+       y = "Mean Value") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+```
+These are the mean of the musical attributes that are used to describe the music.
+
+
+```{r}
+library(dplyr)
+
+# Counting songs per artist
+artist_counts <- datasheet %>%
+  group_by(artist) %>%
+  summarise(song_count = n())
+
+# Filtering artists with more than one song
+artists_with_multiple_songs <- artist_counts %>%
+  filter(song_count > 1)
+
+# Displaying the result
+print(artists_with_multiple_songs)
+```
+From the output, these are the artistes with more than 1 song on the Top 100 most Streamed on Spotify. Ed Sheeran has the most songs with 5 songs followed by Imagine Dragons with 4 songs, then Justin Bieber and Billie Eilish with 3 songs respectively. Ariana Grande, Charlie Puth, Drake, Dua Lipa, Luis Fonsi and Major Lazor all with 2 songs. 
+
+```{r}
+# Assuming 'datasheet' is your dataset
+library(ggplot2)
+library(dplyr)
+
+# Function to plot features
+plot_features <- function(data, artist, ax) {
+  ggplot(data, aes(x = reorder(artist, -popularity), y = popularity, fill = artist)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    labs(title = paste("Features for", artist),
+         x = "Artist",
+         y = "Popularity") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+}
+
+# Top 3 artists
+top_artists <- datasheet %>%
+  count(artist) %>%
+  arrange(desc(n)) %>%
+  slice(1:3)
+
+# Subset data for top artists
+top_artists_data <- datasheet %>%
+  filter(artist %in% top_artists$artist)
+
+# Plotting features for all artists and top 3 artists
+par(mfrow=c(2,2), mar=c(4,4,2,1))
+plot_features(datasheet, "All Artists", ax = 1)
+plot_features(top_artists_data[top_artists_data$artist == 'Justin Bieber', ], "Justin Bieber", ax = 2)
+plot_features(top_artists_data[top_artists_data$artist == 'Ed Sheeran', ], "Ed Sheeran", ax = 3)
+plot_features(top_artists_data[top_artists_data$artist == 'Imagine Dragons', ], "Imagine Dragons", ax = 4)
+
+```
+
+
+From the results, there are a lot of similarities between Ed Sheeran and Imagine Dragons songs since they have high values of popularity. 
+
+
+
+Discussions
+The results obtained from the analysis of the Top 100 most Streamed songs on Spotify offer valuable insights into the musical landscape represented in this dataset.These findings can inform discussions on the evolution of musical preferences, production trends, and the enduring popularity of certain artists and songs.  
+
+Temporal Trends:
+The median release year of 2017 indicates that the majority of the songs in the dataset were released around that time, with a concentration between 2015 and 2018. The identification of outlier years, such as 1975, 2004, 2008, and 1995, highlights the presence of enduring classics or particularly influential years in the dataset. Notably, the outliers align with well-known songs like "Bohemian Rhapsody - Remastered 2011," "Mr. Brightside," "I'm Yours," and "Wonderwall - Remastered."
+
+BPM Variation:
+The analysis of beats per minute (BPM) over the years reveals intriguing patterns. The sharp increase from 1975 to 1995, followed by a decline from 2004 to 2012, and subsequent rises and falls, reflects dynamic shifts in musical trends. This information could be indicative of changing genres, styles, or listener preferences over time.
+
+Song Duration:
+The decreasing trend in song length from 2013 to 2021 suggests a potential shift in audience preferences towards shorter songs. This could be influenced by factors such as attention span, changing radio and streaming platform preferences, or evolving music production norms.
+
+Loudness Dynamics:
+The drastic drop in loudness from 1975 to 1995 indicates a historical change in the mastering and production techniques of popular music during that period. The relatively steady loudness from 2013 to 2021 may suggest a stabilization or a preference for a particular loudness profile in contemporary music.
+
+Artist Representation:
+The analysis of artists with multiple songs in the Top 100 most Streamed list reveals notable figures such as Ed Sheeran, Imagine Dragons, Justin Bieber, and Billie Eilish. The concentration of multiple songs by these artists may indicate a consistent appeal and popularity among Spotify users.
+
+Correlation Patterns:
+The correlation matrix provides valuable insights into relationships between musical attributes. High positive correlations (e.g., loudness and energy) and high negative correlations (e.g., acousticness and energy) shed light on how these attributes interact, influencing the overall musical experience.
+
+
+Conclusion
+The culmination of this analysis reveals several key findings that shed light on the musical attributes associated with the top 100 songs on Spotify, contributing valuable insights to the understanding of digital music consumption patterns.
+
+One of the prominent findings is the high positive correlation between loudness and energy, indicating that songs with higher energy levels tend to be perceived as louder. Conversely, a noteworthy negative correlation between acousticness and energy suggests that songs characterized by acoustic elements exhibit lower energy levels. The positive correlation between valence and danceability emphasizes the connection between musical positivity and the suitability of a track for dancing. Additionally, the median year of song releases in the top 100 indicates a concentration between 2015 and 2018, offering a temporal context to the analyzed dataset.
+
+The examination of outlier years, notably 1975, 2004, 2008, and 1995, spotlighted songs such as "Bohemian Rhapsody - Remastered 2011," "Mr. Brightside," "I'm Yours," and "Wonderwall - Remastered." These outliers not only represent diverse genres but also underscore the enduring popularity of certain timeless classics.
+
+Graphical representations of beats per minute (BPM) by release year revealed nuanced temporal patterns, highlighting distinct phases of increase, decrease, and subsequent rise, offering a dynamic narrative of the evolution of musical tempo. The analysis of song duration over the years showcased a declining trend, suggesting a shift towards shorter musical compositions in recent times. Similarly, the exploration of loudness trends demonstrated a drastic drop from 1975 to 1995, with a more stable pattern from 2013 to 2021.
+
+The examination of artists with multiple entries in the top 100 uncovered a dominance by Ed Sheeran, followed by Imagine Dragons, Justin Bieber, and Billie Eilish. This distribution underscores the influence of certain artists in shaping the popular musical landscape on Spotify.
+
+However, it is crucial to acknowledge the limitations of this analysis. The dataset, while rich, is confined to a specific timeframe, and the dynamics of musical preferences are subject to constant evolution. Moreover, the quantitative approach, while revealing correlations, may not capture the intricate qualitative aspects of musical preferences.
+
+For future research, delving into the evolving landscape of digital curation algorithms and their impact on shaping user preferences could provide valuable insights. Exploring the interplay between algorithmic recommendations and user engagement could contribute to a more nuanced understanding of the evolving dynamics of digital music consumption.
+
+In conclusion, this analysis contributes substantively to unraveling the intricacies of musical attributes defining the top 100 songs on Spotify. The findings not only enhance our comprehension of the digital music landscape but also lay the groundwork for further research exploring the dynamic interplay between technology, musical preferences, and cultural trends.
+
